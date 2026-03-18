@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "socrates-api"
+version = "0.1.0"
+description = "REST API for Socrates AI framework"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    {name = "Socrates Team", email = "info@socrates-ai.dev"}
+]
+license = {text = "MIT"}
+keywords = ["api", "rest", "socrates", "ai", "development", "fastapi"]
+
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn>=0.24.0",
+    "pydantic>=2.0.0",
+    "socrates-cli>=0.1.0",
+    "socratic-learning>=0.1.0",
+    "socratic-analyzer>=0.1.0",
+    "socratic-workflow>=0.1.0",
+    "socratic-conflict>=0.1.0",
+    "socratic-agents>=0.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.0",
+    "httpx>=0.24.0",
+    "black>=23.0.0",
+    "mypy>=1.5.0",
+    "ruff>=0.0.292",
+]
+
+[project.urls]
+Homepage = "https://github.com/Nireus79/Socrates-api"
+Documentation = "https://github.com/Nireus79/Socrates-api"
+Repository = "https://github.com/Nireus79/Socrates-api.git"
+"Bug Tracker" = "https://github.com/Nireus79/Socrates-api/issues"
+
+[tool.setuptools]
+packages = ["socrates_api"]
+package-dir = {"" = "src"}
+
+[tool.black]
+line-length = 100
+
+[tool.ruff]
+line-length = 100
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
