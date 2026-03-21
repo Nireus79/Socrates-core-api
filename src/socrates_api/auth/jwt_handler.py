@@ -19,7 +19,7 @@ if not SECRET_KEY:
     import warnings
     warnings.warn(
         "JWT_SECRET_KEY not set! Using insecure default. Set JWT_SECRET_KEY environment variable.",
-        SecurityWarning,
+        UserWarning,
         stacklevel=2
     )
     SECRET_KEY = "your-secret-key-change-in-production"  # Fallback with warning
