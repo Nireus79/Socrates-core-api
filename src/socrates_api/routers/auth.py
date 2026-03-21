@@ -1191,3 +1191,61 @@ def _revoke_refresh_token(db: ProjectDatabase, username: str) -> None:
 
     except Exception as e:
         logger.error(f"Error revoking refresh tokens for user {username}: {str(e)}")
+
+
+@router.get(
+    "/audit-logs",
+    response_model=dict,
+    status_code=status.HTTP_200_OK,
+    summary="Get audit logs",
+    responses={
+        200: {"description": "Audit logs retrieved successfully"},
+        401: {"description": "Unauthorized", "model": ErrorResponse},
+        403: {"description": "Forbidden - user cannot view audit logs", "model": ErrorResponse},
+    },
+)
+async def get_audit_logs(
+    limit: int = Query(100, ge=1, le=1000),
+    user: dict = Depends(get_current_user),
+):
+    """
+    Get audit logs for the authenticated user.
+
+    Returns a list of audit log entries for the user's account,
+    useful for security monitoring and compliance.
+
+    Query Parameters:
+    - limit: Maximum number of logs to return (default: 100, max: 1000)
+
+    Returns:
+        Dictionary with audit logs
+    """
+    try:
+        from socrates_api.middleware.audit import get_audit_logger
+
+        audit_logger = get_audit_logger()
+        if not audit_logger:
+            logger.warning("Audit logger not available")
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Audit logging is not available",
+            )
+
+        username = user.get("sub") or user.get("username")
+        logs = audit_logger.get_logs(user_id=username, limit=limit)
+
+        return {
+            "status": "success",
+            "user": username,
+            "count": len(logs),
+            "logs": logs,
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error retrieving audit logs for user {user}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error retrieving audit logs",
+        )
