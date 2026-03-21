@@ -37,12 +37,21 @@ from socrates_api.models import (
 from socratic_system.database import ProjectDatabase
 from socratic_system.models import User
 
-# Import breach checker if available
+# Import security features if available
 try:
-    from socratic_security.auth import check_password_breach, get_breach_checker
+    from socratic_security.auth import (
+        AccountLockoutManager,
+        check_password_breach,
+        get_breach_checker,
+        MFAManager,
+    )
+    SECURITY_AVAILABLE = True
 except ImportError:
     check_password_breach = None
     get_breach_checker = None
+    AccountLockoutManager = None
+    MFAManager = None
+    SECURITY_AVAILABLE = False
 
 # Import rate limiter if available
 try:
@@ -52,6 +61,9 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["authentication"])
+
+# Initialize account lockout manager if security module is available
+lockout_manager = AccountLockoutManager() if AccountLockoutManager else None
 
 
 def _get_rate_limit_decorator(limit_str: str):
@@ -254,10 +266,22 @@ async def login(request: LoginRequest, db: ProjectDatabase = Depends(get_databas
                 detail="Username and password cannot be empty",
             )
 
+        # Check account lockout status if security module is available
+        if lockout_manager:
+            if lockout_manager.is_locked_out(request.username):
+                logger.warning(f"Login attempt for locked-out account: {request.username}")
+                raise HTTPException(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail="Account temporarily locked due to too many failed login attempts. Please try again later.",
+                )
+
         # Load user from database
         user = db.load_user(request.username)
         if user is None:
             logger.warning(f"Login attempt for non-existent user: {request.username}")
+            # Record failed attempt for security tracking
+            if lockout_manager:
+                lockout_manager.record_attempt(request.username, "unknown", success=False)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid username or access code",
@@ -266,12 +290,19 @@ async def login(request: LoginRequest, db: ProjectDatabase = Depends(get_databas
         # Verify password
         if not verify_password(request.password, user.passcode_hash):
             logger.warning(f"Failed login attempt for user: {request.username}")
+            # Record failed attempt and check for lockout
+            if lockout_manager:
+                lockout_manager.check_and_lock(request.username, "api")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid username or access code",
             )
 
         logger.info(f"User logged in successfully: {request.username}")
+
+        # Record successful login attempt
+        if lockout_manager:
+            lockout_manager.record_attempt(request.username, "api", success=True)
 
         # Create tokens
         access_token = create_access_token(request.username)
