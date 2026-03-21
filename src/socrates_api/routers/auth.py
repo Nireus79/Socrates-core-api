@@ -37,6 +37,13 @@ from socrates_api.models import (
 from socratic_system.database import ProjectDatabase
 from socratic_system.models import User
 
+# Import breach checker if available
+try:
+    from socratic_security.auth import check_password_breach, get_breach_checker
+except ImportError:
+    check_password_breach = None
+    get_breach_checker = None
+
 # Import rate limiter if available
 try:
     from socrates_api.main import limiter
@@ -139,6 +146,18 @@ async def register(request: RegisterRequest, db: ProjectDatabase = Depends(get_d
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
                     detail="Email already registered",
+                )
+
+        # Check if password has been breached
+        if check_password_breach is not None:
+            is_breached, breach_count = await check_password_breach(request.password)
+            if is_breached:
+                logger.warning(
+                    f"Registration blocked: password found in {breach_count} breaches"
+                )
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Password has been found in known data breaches. Please use a different password.",
                 )
 
         # Hash password
@@ -446,6 +465,18 @@ async def change_password(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="New password must be different from old password",
             )
+
+        # Check if new password has been breached
+        if check_password_breach is not None:
+            is_breached, breach_count = await check_password_breach(request.new_password)
+            if is_breached:
+                logger.warning(
+                    f"Password change blocked for {current_user}: password found in {breach_count} breaches"
+                )
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Password has been found in known data breaches. Please use a different password.",
+                )
 
         # Hash new password
         new_password_hash = hash_password(request.new_password)
