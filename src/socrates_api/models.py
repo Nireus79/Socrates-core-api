@@ -5,7 +5,22 @@ Pydantic models for API request/response bodies
 from datetime import datetime
 from typing import Any, Dict, List, Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+# Import input validation utilities if available
+try:
+    from socratic_security.input_validation import (
+        SanitizedStr,
+        validate_no_sql_injection,
+        validate_no_xss,
+    )
+    SECURITY_VALIDATION_AVAILABLE = True
+except ImportError:
+    # Fallback to regular strings if security module unavailable
+    SanitizedStr = str
+    validate_no_sql_injection = None
+    validate_no_xss = None
+    SECURITY_VALIDATION_AVAILABLE = False
 
 
 # ============================================================================
@@ -79,11 +94,21 @@ class CreateProjectRequest(BaseModel):
         },
     )
 
-    name: str = Field(..., min_length=1, max_length=200, description="Project name")
-    description: Optional[str] = Field(None, max_length=1000, description="Project description")
-    knowledge_base_content: Optional[str] = Field(
+    name: SanitizedStr = Field(..., min_length=1, max_length=200, description="Project name")
+    description: Optional[SanitizedStr] = Field(None, max_length=1000, description="Project description")
+    knowledge_base_content: Optional[SanitizedStr] = Field(
         None, description="Initial knowledge base content"
     )
+
+    @field_validator("name", "description")
+    @classmethod
+    def validate_no_injection(cls, v):
+        """Validate input for SQL injection and XSS attacks"""
+        if v is None:
+            return v
+        if validate_no_sql_injection:
+            validate_no_sql_injection(v)
+        return v
 
 
 class UpdateProjectRequest(BaseModel):
@@ -99,8 +124,18 @@ class UpdateProjectRequest(BaseModel):
         },
     )
 
-    name: Optional[str] = Field(None, min_length=1, max_length=200, description="Project name")
-    phase: Optional[str] = Field(None, description="Project phase")
+    name: Optional[SanitizedStr] = Field(None, min_length=1, max_length=200, description="Project name")
+    phase: Optional[SanitizedStr] = Field(None, description="Project phase")
+
+    @field_validator("name", "phase")
+    @classmethod
+    def validate_no_injection(cls, v):
+        """Validate input for SQL injection and XSS attacks"""
+        if v is None:
+            return v
+        if validate_no_sql_injection:
+            validate_no_sql_injection(v)
+        return v
 
 
 class ProjectResponse(BaseModel):
@@ -364,13 +399,26 @@ class RegisterRequest(BaseModel):
         },
     )
 
-    username: str = Field(
-        ..., min_length=3, max_length=100, description="Username (3-100 characters)"
+    username: SanitizedStr = Field(
+        ..., min_length=3, max_length=100, description="Username (3-100 characters, alphanumeric + underscore)"
     )
     email: Optional[str] = Field(None, description="User email address (optional)")
     password: str = Field(
         ..., min_length=8, max_length=200, description="Password (min 8 characters)"
     )
+
+    @field_validator("username")
+    @classmethod
+    def validate_username(cls, v):
+        """Validate username format and content"""
+        if v is None:
+            return v
+        # Check for valid characters (alphanumeric + underscore)
+        if not all(c.isalnum() or c == '_' for c in v):
+            raise ValueError("Username must contain only alphanumeric characters and underscores")
+        if validate_no_sql_injection:
+            validate_no_sql_injection(v)
+        return v
 
 
 class LoginRequest(BaseModel):
@@ -386,8 +434,18 @@ class LoginRequest(BaseModel):
         },
     )
 
-    username: str = Field(..., description="Username")
+    username: SanitizedStr = Field(..., description="Username")
     password: str = Field(..., description="Password")
+
+    @field_validator("username")
+    @classmethod
+    def validate_username(cls, v):
+        """Validate username for injection attacks"""
+        if v is None:
+            return v
+        if validate_no_sql_injection:
+            validate_no_sql_injection(v)
+        return v
 
 
 class UserResponse(BaseModel):
