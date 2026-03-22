@@ -650,3 +650,90 @@ async def get_analysis_report(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to generate report: {str(e)}",
         )
+
+
+@router.post(
+    "/code",
+    response_model=APIResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Analyze code",
+    responses={
+        200: {"description": "Code analysis completed"},
+        400: {"description": "Invalid input", "model": ErrorResponse},
+        503: {"description": "Analyzer unavailable", "model": ErrorResponse},
+    },
+)
+async def analyze_code(
+    code: str,
+    language: str = "python",
+    current_user: str = Depends(get_current_user),
+):
+    """
+    Perform comprehensive code analysis.
+
+    Analyzes code for quality, security issues, and performance problems using
+    the socratic-analyzer library.
+
+    Args:
+        code: Source code to analyze
+        language: Programming language (python, javascript, typescript, etc.)
+        current_user: Authenticated user
+
+    Returns:
+        SuccessResponse with analysis results including:
+        - Overall quality score (0-100)
+        - Quality metrics (complexity, maintainability, etc.)
+        - Security issues found
+        - Performance issues and recommendations
+        - Architecture insights
+    """
+    try:
+        from socratic_system.core.analyzer_integration import AnalyzerIntegration
+        from socrates_api.routers.events import record_event
+
+        # Initialize analyzer
+        try:
+            analyzer = AnalyzerIntegration()
+        except Exception as e:
+            logger.error(f"Failed to initialize code analyzer: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Code analyzer is not available",
+            )
+
+        logger.info(f"Analyzing {language} code for user: {current_user}")
+
+        # Run comprehensive analysis
+        analysis_result = analyzer.analyze_code(code, language=language)
+
+        if analysis_result.get("error"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to analyze code: {analysis_result['error']}",
+            )
+
+        # Record event
+        record_event(
+            "code_analyzed",
+            {
+                "language": language,
+                "score": analysis_result.get("overall_score", 0),
+            },
+            user_id=current_user,
+        )
+
+        return APIResponse(
+            success=True,
+            status="success",
+            message=f"Code analysis completed (Score: {analysis_result.get('overall_score', 0):.1f}/100)",
+            data=analysis_result,
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error analyzing code: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to analyze code: {str(e)}",
+        )
