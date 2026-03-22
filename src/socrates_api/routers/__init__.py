@@ -19,6 +19,7 @@ from socrates_api.routers.free_session import router as free_session_router
 from socrates_api.routers.github import router as github_router
 from socrates_api.routers.knowledge import router as knowledge_router
 from socrates_api.routers.knowledge_management import router as knowledge_management_router
+from socrates_api.routers.learning import router as learning_router
 from socrates_api.routers.llm import router as llm_router
 from socrates_api.routers.nlu import router as nlu_router
 from socrates_api.routers.notes import router as notes_router
@@ -52,6 +53,7 @@ __all__ = [
     "sponsorships_router",
     "query_router",
     "knowledge_management_router",
+    "learning_router",
     "commands_router",
     "conflicts_router",
     "skills_router",
