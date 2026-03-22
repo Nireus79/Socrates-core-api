@@ -67,6 +67,7 @@ from .routers import (
     knowledge_management_router,
     knowledge_router,
     learning_router,
+    library_integrations_router,
     llm_router,
     nlu_router,
     notes_router,
@@ -449,6 +450,7 @@ app.include_router(collab_router)
 app.include_router(code_generation_router)
 app.include_router(knowledge_router)
 app.include_router(learning_router)
+app.include_router(library_integrations_router)
 app.include_router(llm_router)
 app.include_router(projects_chat_router)
 app.include_router(analysis_router)

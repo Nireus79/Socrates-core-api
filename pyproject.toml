@@ -51,8 +51,7 @@ dependencies = [
 
 [project.optional-dependencies]
 full = [
-    "socratic-analyzer>=0.1.0",     # Code analysis
-    "socratic-knowledge>=0.1.0",    # Knowledge management
+    # All core libraries already in base dependencies
 ]
 dev = [
     "pytest>=7.0",

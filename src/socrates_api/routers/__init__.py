@@ -32,6 +32,7 @@ from socrates_api.routers.skills import router as skills_router
 from socrates_api.routers.sponsorships import router as sponsorships_router
 from socrates_api.routers.subscription import router as subscription_router
 from socrates_api.routers.system import router as system_router
+from socrates_api.routers.library_integrations import router as library_integrations_router
 
 __all__ = [
     "auth_router",
@@ -62,4 +63,5 @@ __all__ = [
     "nlu_router",
     "free_session_router",
     "chat_sessions_router",
+    "library_integrations_router",
 ]
