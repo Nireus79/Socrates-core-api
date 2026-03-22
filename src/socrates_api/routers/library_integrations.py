@@ -549,9 +549,13 @@ async def index_rag_document(
         Indexing confirmation with document ID
     """
     try:
-        # This would use the RAG manager directly
+        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+
+        orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
+        doc_id = orchestrator.index_rag_document(content, source, metadata)
         return {
             "status": "indexed",
+            "doc_id": doc_id,
             "source": source,
             "message": "Document indexed for semantic search"
         }
@@ -581,7 +585,11 @@ async def search_rag(
         List of relevant documents with scores
     """
     try:
-        return []  # Would return actual RAG search results
+        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+
+        orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
+        results = orchestrator.search_rag(query, limit)
+        return results or []
     except Exception as e:
         logger.error(f"RAG search failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -595,11 +603,19 @@ async def get_rag_status() -> Dict[str, Any]:
     Returns:
         RAG system status and vector store information
     """
-    return {
-        "rag": True,
-        "vector_stores": ["chromadb", "faiss", "qdrant", "pinecone"],
-        "status": "operational"
-    }
+    try:
+        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+
+        orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
+        status = orchestrator.get_library_status()
+        return {
+            "rag": status.get("rag", False),
+            "vector_stores": ["chromadb", "faiss", "qdrant", "pinecone"],
+            "status": "operational" if status.get("rag") else "unavailable"
+        }
+    except Exception as e:
+        logger.error(f"Failed to get RAG status: {e}")
+        return {"status": "error", "message": str(e)}
 
 
 # ============================================================================
@@ -629,11 +645,11 @@ async def execute_agent(
         Agent execution result
     """
     try:
-        return {
-            "status": "executed",
-            "agent": agent_name,
-            "message": "Agent executed successfully"
-        }
+        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+
+        orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
+        result = orchestrator.execute_agent(agent_name, request_data)
+        return result or {"status": "failed", "message": f"Agent {agent_name} failed"}
     except Exception as e:
         logger.error(f"Agent execution failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -647,16 +663,24 @@ async def list_agents() -> Dict[str, Any]:
     Returns:
         Dictionary of available agents and their capabilities
     """
-    return {
-        "agents": [
-            "code_generator",
-            "question_generator",
-            "response_evaluator",
-            "project_manager",
-            "knowledge_retriever"
-        ],
-        "count": 5
-    }
+    try:
+        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+
+        orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
+        agents = orchestrator.list_agents()
+        return {
+            "agents": agents or [
+                "code_generator",
+                "question_generator",
+                "response_evaluator",
+                "project_manager",
+                "knowledge_retriever"
+            ],
+            "count": len(agents) if agents else 5
+        }
+    except Exception as e:
+        logger.error(f"Failed to list agents: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/agents/status")
@@ -667,11 +691,18 @@ async def get_agents_status() -> Dict[str, Any]:
     Returns:
         Agent orchestration system status
     """
-    return {
-        "agents": True,
-        "count": 5,
-        "status": "operational"
-    }
+    try:
+        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+
+        orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
+        status = orchestrator.get_library_status()
+        return {
+            "agents": status.get("agents", False),
+            "status": "operational" if status.get("agents") else "unavailable"
+        }
+    except Exception as e:
+        logger.error(f"Failed to get agents status: {e}")
+        return {"status": "error", "message": str(e)}
 
 
 # ============================================================================
@@ -698,12 +729,15 @@ async def validate_input(
     Returns:
         Validation result with security score
     """
-    return {
-        "valid": True,
-        "security_score": 95,
-        "threats": [],
-        "message": "Input is safe"
-    }
+    try:
+        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+
+        orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
+        result = orchestrator.validate_security_input(user_input)
+        return result or {"valid": True, "threats": []}
+    except Exception as e:
+        logger.error(f"Input validation failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/security/status")
@@ -714,11 +748,19 @@ async def get_security_status() -> Dict[str, Any]:
     Returns:
         Security system features and status
     """
-    return {
-        "security": True,
-        "features": ["mfa", "encryption", "audit_logging", "input_validation"],
-        "status": "operational"
-    }
+    try:
+        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+
+        orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
+        status = orchestrator.get_library_status()
+        return {
+            "security": status.get("security", False),
+            "features": ["mfa", "encryption", "audit_logging", "input_validation"],
+            "status": "operational" if status.get("security") else "unavailable"
+        }
+    except Exception as e:
+        logger.error(f"Failed to get security status: {e}")
+        return {"status": "error", "message": str(e)}
 
 
 # ============================================================================
@@ -751,14 +793,20 @@ async def call_llm(
     Returns:
         LLM response with token usage and cost
     """
-    return {
-        "status": "success",
-        "provider": provider,
-        "model": model,
-        "response": "Generated response would appear here",
-        "tokens_used": 100,
-        "cost_usd": 0.001
-    }
+    try:
+        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+
+        orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
+        result = orchestrator.call_llm(
+            prompt=prompt,
+            model=model,
+            provider=provider,
+            temperature=temperature
+        )
+        return result or {"status": "failed", "message": "LLM call failed"}
+    except Exception as e:
+        logger.error(f"LLM call failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/llm/models")
@@ -769,15 +817,20 @@ async def list_llm_models() -> Dict[str, Any]:
     Returns:
         Dictionary of providers and available models
     """
-    return {
-        "providers": {
-            "anthropic": ["claude-opus", "claude-sonnet", "claude-haiku"],
-            "openai": ["gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"],
-            "google": ["gemini-pro", "gemini-flash"],
-            "ollama": ["Local models available"]
-        },
-        "total_models": 10
-    }
+    try:
+        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+
+        orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
+        models = orchestrator.list_llm_models()
+        return models or {
+            "providers": {
+                "anthropic": ["claude-opus", "claude-sonnet", "claude-haiku"],
+                "openai": ["gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"],
+            }
+        }
+    except Exception as e:
+        logger.error(f"Failed to list models: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/llm/status")
@@ -788,11 +841,18 @@ async def get_llm_status() -> Dict[str, Any]:
     Returns:
         LLM provider status and capabilities
     """
-    return {
-        "nexus": True,
-        "providers": ["anthropic", "openai", "google", "ollama"],
-        "status": "operational"
-    }
+    try:
+        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+
+        orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
+        status = orchestrator.get_library_status()
+        return {
+            "nexus": status.get("nexus", False),
+            "status": "operational" if status.get("nexus") else "unavailable"
+        }
+    except Exception as e:
+        logger.error(f"Failed to get LLM status: {e}")
+        return {"status": "error", "message": str(e)}
 
 
 # ============================================================================
@@ -808,12 +868,20 @@ async def get_system_info() -> Dict[str, Any]:
     Returns:
         Framework version, configuration, and capabilities
     """
-    return {
-        "framework": "socratic-core",
-        "version": "0.1.1",
-        "components": ["events", "config", "exceptions", "logging"],
-        "status": "operational"
-    }
+    try:
+        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+
+        orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
+        info = orchestrator.get_system_info()
+        return info or {
+            "framework": "socratic-core",
+            "version": "0.1.1",
+            "components": ["events", "config", "exceptions", "logging"],
+            "status": "operational"
+        }
+    except Exception as e:
+        logger.error(f"Failed to get system info: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/core/config")
@@ -824,12 +892,20 @@ async def get_system_config() -> Dict[str, Any]:
     Returns:
         Active configuration settings
     """
-    return {
-        "claude_model": "claude-opus",
-        "api_key_configured": True,
-        "data_dir": "~/.socrates",
-        "log_level": "INFO"
-    }
+    try:
+        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+
+        orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
+        config = orchestrator.get_system_config()
+        return config or {
+            "claude_model": "claude-opus",
+            "api_key_configured": True,
+            "data_dir": "~/.socrates",
+            "log_level": "INFO"
+        }
+    except Exception as e:
+        logger.error(f"Failed to get system config: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/core/status")
@@ -840,11 +916,18 @@ async def get_core_status() -> Dict[str, Any]:
     Returns:
         Framework status and health
     """
-    return {
-        "core": True,
-        "status": "operational",
-        "uptime_seconds": 3600
-    }
+    try:
+        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+
+        orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
+        status = orchestrator.get_library_status()
+        return {
+            "core": status.get("core", False),
+            "status": "operational" if status.get("core") else "unavailable"
+        }
+    except Exception as e:
+        logger.error(f"Failed to get core status: {e}")
+        return {"status": "error", "message": str(e)}
 
 
 # ============================================================================
