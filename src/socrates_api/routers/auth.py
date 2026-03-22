@@ -42,23 +42,14 @@ from socrates_api.models import (
 from socratic_system.database import ProjectDatabase
 from socratic_system.models import User
 
-# Import security features if available
-try:
-    from socratic_security.auth import (
-        AccountLockoutManager,
-        check_password_breach,
-        get_breach_checker,
-        MFAManager,
-        get_mfa_manager,
-    )
-    SECURITY_AVAILABLE = True
-except ImportError:
-    check_password_breach = None
-    get_breach_checker = None
-    AccountLockoutManager = None
-    MFAManager = None
-    get_mfa_manager = None
-    SECURITY_AVAILABLE = False
+# Import security features (REQUIRED)
+from socratic_security.auth import (
+    AccountLockoutManager,
+    check_password_breach,
+    get_breach_checker,
+    MFAManager,
+    get_mfa_manager,
+)
 
 # Import rate limiter if available
 try:
@@ -69,11 +60,11 @@ except ImportError:
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
-# Initialize account lockout manager if security module is available
-lockout_manager = AccountLockoutManager() if AccountLockoutManager else None
+# Initialize account lockout manager (REQUIRED)
+lockout_manager = AccountLockoutManager()
 
-# Initialize MFA manager if security module is available
-mfa_manager = get_mfa_manager() if get_mfa_manager else None
+# Initialize MFA manager (REQUIRED)
+mfa_manager = get_mfa_manager()
 
 
 def _get_rate_limit_decorator(limit_str: str):
@@ -174,17 +165,16 @@ async def register(
                     detail="Email already registered",
                 )
 
-        # Check if password has been breached
-        if check_password_breach is not None:
-            is_breached, breach_count = await check_password_breach(register_request.password)
-            if is_breached:
-                logger.warning(
-                    f"Registration blocked: password found in {breach_count} breaches"
-                )
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Password has been found in known data breaches. Please use a different password.",
-                )
+        # Check if password has been breached (REQUIRED security check)
+        is_breached, breach_count = await check_password_breach(register_request.password)
+        if is_breached:
+            logger.warning(
+                f"Registration blocked: password found in {breach_count} breaches"
+            )
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Password has been found in known data breaches. Please use a different password.",
+            )
 
         # Hash password
         password_hash = hash_password(register_request.password)
@@ -292,22 +282,20 @@ async def login(
                 detail="Username and password cannot be empty",
             )
 
-        # Check account lockout status if security module is available
-        if lockout_manager:
-            if lockout_manager.is_locked_out(login_request.username):
-                logger.warning(f"Login attempt for locked-out account: {login_request.username}")
-                raise HTTPException(
-                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                    detail="Account temporarily locked due to too many failed login attempts. Please try again later.",
-                )
+        # Check account lockout status (REQUIRED security check)
+        if lockout_manager.is_locked_out(login_request.username):
+            logger.warning(f"Login attempt for locked-out account: {login_request.username}")
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Account temporarily locked due to too many failed login attempts. Please try again later.",
+            )
 
         # Load user from database
         user = db.load_user(login_request.username)
         if user is None:
             logger.warning(f"Login attempt for non-existent user: {login_request.username}")
-            # Record failed attempt for security tracking
-            if lockout_manager:
-                lockout_manager.record_attempt(login_request.username, "unknown", success=False)
+            # Record failed attempt for security tracking (REQUIRED)
+            lockout_manager.record_attempt(login_request.username, "unknown", success=False)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid username or access code",
@@ -316,9 +304,8 @@ async def login(
         # Verify password
         if not verify_password(login_request.password, user.passcode_hash):
             logger.warning(f"Failed login attempt for user: {login_request.username}")
-            # Record failed attempt and check for lockout
-            if lockout_manager:
-                lockout_manager.check_and_lock(login_request.username, "api")
+            # Record failed attempt and check for lockout (REQUIRED)
+            lockout_manager.check_and_lock(login_request.username, "api")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid username or access code",
@@ -326,12 +313,11 @@ async def login(
 
         logger.info(f"User logged in successfully: {login_request.username}")
 
-        # Record successful login attempt
-        if lockout_manager:
-            lockout_manager.record_attempt(login_request.username, "api", success=True)
+        # Record successful login attempt (REQUIRED)
+        lockout_manager.record_attempt(login_request.username, "api", success=True)
 
-        # Check if MFA is enabled for user
-        if mfa_manager and mfa_manager.is_mfa_enabled(login_request.username):
+        # Check if MFA is enabled for user (REQUIRED security check)
+        if mfa_manager.is_mfa_enabled(login_request.username):
             logger.info(f"MFA verification required for user: {login_request.username}")
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
@@ -427,12 +413,6 @@ async def login_mfa_verify(
         HTTPException: If MFA code invalid or user not found
     """
     try:
-        if not mfa_manager:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="MFA is not available",
-            )
-
         # Verify that both totp_code and recovery_code are not both provided
         if request.totp_code and request.recovery_code:
             raise HTTPException(
@@ -465,8 +445,8 @@ async def login_mfa_verify(
 
         if not mfa_result.is_valid:
             logger.warning(f"MFA verification failed for user: {request.username}: {mfa_result.error}")
-            if lockout_manager:
-                lockout_manager.check_and_lock(request.username, "api")
+            # Record failed MFA attempt (REQUIRED)
+            lockout_manager.check_and_lock(request.username, "api")
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=mfa_result.error or "Invalid MFA code",
@@ -672,17 +652,16 @@ async def change_password(
                 detail="New password must be different from old password",
             )
 
-        # Check if new password has been breached
-        if check_password_breach is not None:
-            is_breached, breach_count = await check_password_breach(request.new_password)
-            if is_breached:
-                logger.warning(
-                    f"Password change blocked for {current_user}: password found in {breach_count} breaches"
-                )
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Password has been found in known data breaches. Please use a different password.",
-                )
+        # Check if new password has been breached (REQUIRED security check)
+        is_breached, breach_count = await check_password_breach(request.new_password)
+        if is_breached:
+            logger.warning(
+                f"Password change blocked for {current_user}: password found in {breach_count} breaches"
+            )
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Password has been found in known data breaches. Please use a different password.",
+            )
 
         # Hash new password
         new_password_hash = hash_password(request.new_password)
@@ -744,13 +723,7 @@ async def mfa_enable(
         HTTPException: If MFA not available
     """
     try:
-        if not mfa_manager:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="MFA is not available",
-            )
-
-        # Generate TOTP secret and backup codes
+        # Generate TOTP secret and backup codes (MFA is REQUIRED)
         mfa_setup = mfa_manager.generate_secret(current_user)
 
         logger.info(f"MFA setup initialized for user: {current_user}")
@@ -804,13 +777,7 @@ async def mfa_verify_enable(
         HTTPException: If TOTP code invalid or MFA not available
     """
     try:
-        if not mfa_manager:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="MFA is not available",
-            )
-
-        # Verify TOTP code and enable MFA
+        # Verify TOTP code and enable MFA (REQUIRED)
         success, message = mfa_manager.enable_mfa(
             current_user,
             mfa_manager.get_totp_secret(current_user),
@@ -824,9 +791,8 @@ async def mfa_verify_enable(
                 detail=message,
             )
 
-        # Log the MFA enablement event
-        if mfa_manager:
-            logger.info(f"MFA enabled successfully for user: {current_user}")
+        # Log the MFA enablement event (REQUIRED)
+        logger.info(f"MFA enabled successfully for user: {current_user}")
 
         return APIResponse(
             success=True,
@@ -878,12 +844,6 @@ async def mfa_disable(
         HTTPException: If password invalid or MFA not available
     """
     try:
-        if not mfa_manager:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="MFA is not available",
-            )
-
         # Load user and verify password
         user = db.load_user(current_user)
         if user is None or not verify_password(request.password, user.passcode_hash):
@@ -940,9 +900,8 @@ async def mfa_status(
         HTTPException: If not authenticated
     """
     try:
-        mfa_enabled = False
-        if mfa_manager:
-            mfa_enabled = mfa_manager.is_mfa_enabled(current_user)
+        # Check MFA status (MFA is REQUIRED)
+        mfa_enabled = mfa_manager.is_mfa_enabled(current_user)
 
         return MFAStatusResponse(
             mfa_enabled=mfa_enabled,

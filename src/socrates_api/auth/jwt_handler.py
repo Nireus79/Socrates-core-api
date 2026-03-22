@@ -15,14 +15,17 @@ import jwt
 
 # Configuration
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-if not SECRET_KEY:
-    import warnings
-    warnings.warn(
-        "JWT_SECRET_KEY not set! Using insecure default. Set JWT_SECRET_KEY environment variable.",
-        UserWarning,
-        stacklevel=2
+if not SECRET_KEY or SECRET_KEY == "your-secret-key-change-in-production":
+    raise RuntimeError(
+        "CRITICAL: JWT_SECRET_KEY environment variable is not set or using insecure default.\n"
+        "This is required for secure token generation.\n\n"
+        "To fix:\n"
+        "  1. Generate a strong key:\n"
+        "     python -c \"import secrets; print(secrets.token_urlsafe(32))\"\n"
+        "  2. Set environment variable:\n"
+        "     export JWT_SECRET_KEY='<generated-key>'\n"
+        "  3. For Docker, add to .env file or use -e flag"
     )
-    SECRET_KEY = "your-secret-key-change-in-production"  # Fallback with warning
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 15
