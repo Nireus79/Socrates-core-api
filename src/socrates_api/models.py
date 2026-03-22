@@ -7,20 +7,12 @@ from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-# Import input validation utilities if available
-try:
-    from socratic_security.input_validation import (
-        SanitizedStr,
-        validate_no_sql_injection,
-        validate_no_xss,
-    )
-    SECURITY_VALIDATION_AVAILABLE = True
-except ImportError:
-    # Fallback to regular strings if security module unavailable
-    SanitizedStr = str
-    validate_no_sql_injection = None
-    validate_no_xss = None
-    SECURITY_VALIDATION_AVAILABLE = False
+# Import input validation utilities (REQUIRED)
+from socratic_security.input_validation import (
+    SanitizedStr,
+    validate_no_sql_injection,
+    validate_no_xss,
+)
 
 
 # ============================================================================
@@ -103,11 +95,10 @@ class CreateProjectRequest(BaseModel):
     @field_validator("name", "description")
     @classmethod
     def validate_no_injection(cls, v):
-        """Validate input for SQL injection and XSS attacks"""
+        """Validate input for SQL injection and XSS attacks (REQUIRED)"""
         if v is None:
             return v
-        if validate_no_sql_injection:
-            validate_no_sql_injection(v)
+        validate_no_sql_injection(v)
         return v
 
 
@@ -130,11 +121,10 @@ class UpdateProjectRequest(BaseModel):
     @field_validator("name", "phase")
     @classmethod
     def validate_no_injection(cls, v):
-        """Validate input for SQL injection and XSS attacks"""
+        """Validate input for SQL injection and XSS attacks (REQUIRED)"""
         if v is None:
             return v
-        if validate_no_sql_injection:
-            validate_no_sql_injection(v)
+        validate_no_sql_injection(v)
         return v
 
 
@@ -209,8 +199,17 @@ class AskQuestionRequest(BaseModel):
         },
     )
 
-    topic: Optional[str] = Field(None, description="Topic to ask about")
-    difficulty_level: str = Field(default="intermediate", description="Question difficulty level")
+    topic: Optional[SanitizedStr] = Field(None, description="Topic to ask about")
+    difficulty_level: SanitizedStr = Field(default="intermediate", description="Question difficulty level")
+
+    @field_validator("topic", "difficulty_level")
+    @classmethod
+    def validate_question_fields(cls, v):
+        """Validate question fields for injection attacks (REQUIRED)"""
+        if v is None:
+            return v
+        validate_no_sql_injection(v)  # REQUIRED
+        return v
 
 
 class QuestionResponse(BaseModel):
@@ -251,7 +250,16 @@ class ProcessResponseRequest(BaseModel):
     )
 
     question_id: str = Field(..., description="Question identifier")
-    user_response: str = Field(..., min_length=1, description="User's response to the question")
+    user_response: SanitizedStr = Field(..., min_length=1, description="User's response to the question")
+
+    @field_validator("user_response")
+    @classmethod
+    def validate_response(cls, v):
+        """Validate user response for injection attacks (REQUIRED)"""
+        if v is None:
+            return v
+        validate_no_sql_injection(v)  # REQUIRED
+        return v
 
 
 class ProcessResponseResponse(BaseModel):
@@ -410,14 +418,13 @@ class RegisterRequest(BaseModel):
     @field_validator("username")
     @classmethod
     def validate_username(cls, v):
-        """Validate username format and content"""
+        """Validate username format and content (REQUIRED)"""
         if v is None:
             return v
         # Check for valid characters (alphanumeric + underscore)
         if not all(c.isalnum() or c == '_' for c in v):
             raise ValueError("Username must contain only alphanumeric characters and underscores")
-        if validate_no_sql_injection:
-            validate_no_sql_injection(v)
+        validate_no_sql_injection(v)  # REQUIRED
         return v
 
 
@@ -440,11 +447,10 @@ class LoginRequest(BaseModel):
     @field_validator("username")
     @classmethod
     def validate_username(cls, v):
-        """Validate username for injection attacks"""
+        """Validate username for injection attacks (REQUIRED)"""
         if v is None:
             return v
-        if validate_no_sql_injection:
-            validate_no_sql_injection(v)
+        validate_no_sql_injection(v)  # REQUIRED
         return v
 
 
@@ -714,7 +720,16 @@ class CreateChatSessionRequest(BaseModel):
         json_schema_extra={"example": {"title": "Initial Design Discussion"}},
     )
 
-    title: Optional[str] = Field(None, max_length=255, description="Session title")
+    title: Optional[SanitizedStr] = Field(None, max_length=255, description="Session title")
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, v):
+        """Validate title for injection attacks (REQUIRED)"""
+        if v is None:
+            return v
+        validate_no_sql_injection(v)  # REQUIRED
+        return v
 
 
 class ChatSessionResponse(BaseModel):
@@ -786,9 +801,18 @@ class ChatMessageRequest(BaseModel):
         },
     )
 
-    message: str = Field(..., min_length=1, max_length=5000, description="Message content (max 5000 characters)")
-    role: str = Field(default="user", description="Message role (user or assistant)")
-    mode: str = Field(default="socratic", description="Chat mode (socratic or direct)")
+    message: SanitizedStr = Field(..., min_length=1, max_length=5000, description="Message content (max 5000 characters)")
+    role: SanitizedStr = Field(default="user", description="Message role (user or assistant)")
+    mode: SanitizedStr = Field(default="socratic", description="Chat mode (socratic or direct)")
+
+    @field_validator("message", "role", "mode")
+    @classmethod
+    def validate_message_fields(cls, v):
+        """Validate message fields for injection attacks (REQUIRED)"""
+        if v is None:
+            return v
+        validate_no_sql_injection(v)  # REQUIRED
+        return v
 
 
 class ChatMessage(BaseModel):
