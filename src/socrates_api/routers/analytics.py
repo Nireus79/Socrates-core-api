@@ -17,36 +17,37 @@ from socrates_api.auth import get_current_user, get_current_user_object
 from socrates_api.database import get_database
 from socrates_api.models import APIResponse, ErrorResponse, SuccessResponse
 from socrates_api.services.report_generator import get_report_generator
-from socratic_system.database import ProjectDatabase
-from socratic_system.core.maturity_calculator import MaturityCalculator
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
 
-def get_phase_readiness_status(project, maturity_calculator: MaturityCalculator):
+def get_phase_readiness_status(project):
     """
     Get readiness status for all phases based on maturity scores.
 
     Returns information about whether user is ready to advance to next phase.
     """
-    phase_maturity_scores = getattr(project, "phase_maturity_scores", {}) or {}
-    all_phases = maturity_calculator.get_all_phases()
-    getattr(project, "current_phase", "discovery") or "discovery"
+    # Default phase definitions (local, not from MaturityCalculator)
+    PHASES = ["discovery", "planning", "development", "testing", "deployment"]
+    READY_THRESHOLD = 0.7
+    COMPLETE_THRESHOLD = 0.95
 
+    phase_maturity_scores = getattr(project, "phase_maturity_scores", {}) or {}
     readiness_status = {}
-    for phase in all_phases:
+
+    for phase in PHASES:
         score = phase_maturity_scores.get(phase, 0.0)
-        is_ready = score >= maturity_calculator.READY_THRESHOLD
+        is_ready = score >= READY_THRESHOLD
 
         readiness_status[phase] = {
             "phase": phase,
             "maturity_percentage": round(score, 1),
             "is_ready_to_advance": is_ready,
-            "ready_threshold": maturity_calculator.READY_THRESHOLD,
-            "complete_threshold": maturity_calculator.COMPLETE_THRESHOLD,
-            "is_complete": score >= maturity_calculator.COMPLETE_THRESHOLD,
-            "status": "complete" if score >= maturity_calculator.COMPLETE_THRESHOLD
+            "ready_threshold": READY_THRESHOLD,
+            "complete_threshold": COMPLETE_THRESHOLD,
+            "is_complete": score >= COMPLETE_THRESHOLD,
+            "status": "complete" if score >= COMPLETE_THRESHOLD
                      else "ready" if is_ready
                      else "in_progress" if score > 0
                      else "not_started",
@@ -277,8 +278,7 @@ async def get_project_analytics(
             completion_percentage = 0.0
 
         # Get phase readiness information
-        maturity_calc = MaturityCalculator(project_type=project_type)
-        phase_readiness = get_phase_readiness_status(project, maturity_calc)
+        phase_readiness = get_phase_readiness_status(project)
 
         analytics = {
             "project_id": project_id,
@@ -1233,8 +1233,7 @@ async def get_dashboard_analytics(
         documentation = min(100, 70 + len(project.notes or []) * 2)
 
         # Get phase readiness information
-        maturity_calc = MaturityCalculator(project_type=project_type)
-        phase_readiness = get_phase_readiness_status(project, maturity_calc)
+        phase_readiness = get_phase_readiness_status(project)
 
         dashboard = {
             "project_id": project_id,

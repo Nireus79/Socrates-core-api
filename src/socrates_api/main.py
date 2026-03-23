@@ -28,16 +28,7 @@ from socrates_api.middleware.rate_limit import (
     initialize_limiter,
 )
 from socrates_api.middleware.security_headers import add_security_headers_middleware
-from socratic_system.events import EventType
-from socratic_system.exceptions import SocratesError
 from socratic_system.orchestration.orchestrator import AgentOrchestrator
-
-# Phase 4 Service Integration
-from core.orchestrator import ServiceOrchestrator
-from modules.marketplace.service import SkillMarketplace
-from modules.distribution.service import SkillDistributionService
-from modules.composition.service import SkillComposer
-from modules.analytics.service import SkillAnalytics
 
 from .models import (
     AskQuestionRequest,
@@ -112,16 +103,6 @@ def get_orchestrator() -> AgentOrchestrator:
     return app_state["orchestrator"]
 
 
-def get_service_orchestrator() -> ServiceOrchestrator:
-    """Dependency injection for Phase 4 service orchestrator"""
-    if app_state.get("service_orchestrator") is None:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Phase 4 services not initialized"
-        )
-    return app_state["service_orchestrator"]
-
-
 def get_rate_limiter_for_app():
     """Get rate limiter instance from app state"""
     return app_state.get("limiter")
@@ -155,26 +136,9 @@ def _setup_event_listeners(orchestrator: AgentOrchestrator):
         return
 
     # Log all events
-    def on_any_event(event_type, data):
-        logger.info(f"[Event] {event_type.value}: {data}")
-
-    # Track specific important events
-    def on_project_created(event_type, data):
-        logger.info(f"Project created: {data.get('project_id')}")
-
-    def on_code_generated(event_type, data):
-        logger.info(f"Code generated: {data.get('lines')} lines")
-
-    def on_agent_error(event_type, data):
-        logger.error(f"Agent error in {data.get('agent_name')}: {data.get('error')}")
-
-    # Register listeners
-    orchestrator.event_emitter.on(EventType.PROJECT_CREATED, on_project_created)
-    orchestrator.event_emitter.on(EventType.CODE_GENERATED, on_code_generated)
-    orchestrator.event_emitter.on(EventType.AGENT_ERROR, on_agent_error)
-
-    app_state["event_listeners_registered"] = True
-    logger.info("Event listeners registered")
+    # Event listener registration depends on local EventType module
+    # TODO: Re-enable when EventType is available from PyPI
+    app_state["event_listeners_registered"] = False
 
 
 async def _monitor_shutdown():
@@ -295,30 +259,6 @@ async def lifespan(app: FastAPI):
 
         logger.error(f"Traceback: {traceback.format_exc()}")
 
-    # Initialize Phase 4 Service Orchestrator
-    try:
-        logger.info("Initializing Phase 4 Service Orchestrator...")
-        service_orchestrator = ServiceOrchestrator()
-
-        # Register Phase 4 services
-        logger.info("Registering Phase 4 services...")
-        service_orchestrator.register_service(SkillMarketplace())
-        service_orchestrator.register_service(SkillDistributionService())
-        service_orchestrator.register_service(SkillComposer())
-        service_orchestrator.register_service(SkillAnalytics())
-
-        # Start all services
-        logger.info("Starting Phase 4 services...")
-        await service_orchestrator.start_all_services()
-
-        # Store in app_state
-        app_state["service_orchestrator"] = service_orchestrator
-        logger.info("Phase 4 Service Orchestrator initialized successfully")
-
-    except Exception as e:
-        logger.error(f"Failed to initialize Phase 4 Service Orchestrator: {type(e).__name__}: {e}")
-        import traceback
-        logger.error(f"Traceback: {traceback.format_exc()}")
 
     # Start shutdown monitor background task
     logger.info("Starting shutdown monitor background task...")
@@ -960,21 +900,6 @@ async def generate_code(request: GenerateCodeRequest):
     except Exception as e:
         logger.error(f"Error generating code: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.exception_handler(SocratesError)
-async def socrates_error_handler(request: Request, exc: SocratesError):
-    """Handle Socrates library errors"""
-    logger.warning(f"SocratesError in {request.url.path}: {str(exc)}")
-    return JSONResponse(
-        status_code=400,
-        content=ErrorResponse(
-            error=exc.__class__.__name__,
-            message=str(exc),
-            error_code=getattr(exc, "error_code", None),
-            details=getattr(exc, "context", None),
-        ).model_dump(),
-    )
 
 
 @app.exception_handler(RateLimitExceeded)
