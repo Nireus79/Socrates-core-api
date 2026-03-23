@@ -17,6 +17,7 @@ from socrates_api.auth import get_current_user, get_current_user_object
 from socrates_api.database import get_database
 from socrates_api.models import APIResponse, ErrorResponse, SuccessResponse
 from socrates_api.services.report_generator import get_report_generator
+from socrates_api.models_local import User, ProjectDatabase
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/analytics", tags=["analytics"])

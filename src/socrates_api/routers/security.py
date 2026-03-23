@@ -15,7 +15,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from socrates_api.auth import get_current_user
 from socrates_api.models import APIResponse, ErrorResponse
-from socratic_system.database import ProjectDatabase
+from socrates_api.database import get_database
+from socrates_api.models_local import User, ProjectDatabase
+# Database import replaced with local module
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/security", tags=["security"])

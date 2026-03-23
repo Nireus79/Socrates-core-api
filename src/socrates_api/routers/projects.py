@@ -41,6 +41,7 @@ from socrates_api.auth.project_access import (
 from socrates_api.database import get_database
 from socrates_api.middleware import SubscriptionChecker
 from socrates_api.models import (
+from socrates_api.models_local import User, ProjectDatabase, ProjectContext
     APIResponse,
     CreateProjectRequest,
     ErrorResponse,
@@ -48,9 +49,8 @@ from socrates_api.models import (
     ProjectResponse,
     UpdateProjectRequest,
 )
-from socratic_system.database import ProjectDatabase
-from socratic_system.models import ProjectContext, User
-from socratic_system.utils.id_generator import ProjectIDGenerator
+# Local imports - no external local code dependencies
+import uuid
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/projects", tags=["projects"])

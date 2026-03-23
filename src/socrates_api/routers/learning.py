@@ -1,3 +1,4 @@
+from socrates_api.models_local import LearningIntegration
 """
 Learning Analytics API Router
 
@@ -12,16 +13,32 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from socratic_system.core.learning_integration import LearningIntegration
-from socratic_system.models.learning import QuestionEffectiveness, UserBehaviorPattern
-
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/learning", tags=["Learning Analytics"])
 
 
 # ============================================================================
-# MODELS
+# LOCAL MODELS (moved from non-existent socratic_system.models)
+# ============================================================================
+
+class QuestionEffectiveness(BaseModel):
+    """Model for question effectiveness metrics"""
+    question_id: str
+    effectiveness_score: float = 0.0
+    times_asked: int = 0
+    correct_responses: int = 0
+
+class UserBehaviorPattern(BaseModel):
+    """Model for user behavior patterns"""
+    user_id: str
+    pattern_type: str
+    frequency: int = 0
+    last_observed: Optional[str] = None
+
+
+# ============================================================================
+# MORE MODELS
 # ============================================================================
 
 

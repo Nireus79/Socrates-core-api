@@ -19,7 +19,8 @@ from socrates_api.auth import get_current_user
 from socrates_api.auth.project_access import check_project_access
 from socrates_api.database import get_database
 from socrates_api.models import APIResponse
-from socratic_system.database import ProjectDatabase
+from socrates_api.models_local import ProjectDatabase
+# Database import replaced with local module
 
 
 class NoteRequest(BaseModel):

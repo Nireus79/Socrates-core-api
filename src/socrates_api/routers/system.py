@@ -18,10 +18,22 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from socrates_api.auth import get_current_user
 from socrates_api.database import get_database
 from socrates_api.models import APIResponse
-from socratic_system.utils.logger import set_debug_mode, is_debug_mode
+from socrates_api.models_local import User
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/system", tags=["system"])
+
+# Local debug mode flag
+_debug_mode = False
+
+def set_debug_mode(enabled: bool):
+    """Set debug mode locally"""
+    global _debug_mode
+    _debug_mode = enabled
+
+def is_debug_mode() -> bool:
+    """Check if debug mode is enabled"""
+    return _debug_mode
 
 
 @router.get(

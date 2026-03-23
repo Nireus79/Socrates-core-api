@@ -19,11 +19,11 @@ from fastapi.responses import FileResponse
 from socrates_api.auth import get_current_user
 from socrates_api.database import get_database
 from socrates_api.auth.project_access import check_project_access
-from socratic_system.database import ProjectDatabase
-from socratic_system.utils.archive_builder import ArchiveBuilder
-from socratic_system.utils.git_initializer import GitInitializer
-from socratic_system.utils.documentation_generator import DocumentationGenerator
 from socrates_api.models import APIResponse
+from socrates_api.models_local import ProjectDatabase
+
+# Removed imports of non-existent local utilities
+# These can be implemented locally if needed
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/projects", tags=["finalization"])

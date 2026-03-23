@@ -19,7 +19,8 @@ from socrates_api.auth import get_current_user
 from socrates_api.auth.project_access import check_project_access
 from socrates_api.database import get_database
 from socrates_api.models import APIResponse
-from socratic_system.database import ProjectDatabase
+from socrates_api.models_local import ProjectDatabase
+# Database import replaced with local module
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/projects", tags=["knowledge"])
@@ -73,7 +74,7 @@ async def add_knowledge_document(
         content_size_bytes = len(request.content.encode("utf-8"))
         user_object = db.load_user(current_user)
         if user_object:
-            from socratic_system.subscription.storage import StorageQuotaManager
+            # Removed local import: from socratic_system.subscription.storage import StorageQuotaManager
             can_upload, error_msg = StorageQuotaManager.can_upload_document(
                 user_object, db, content_size_bytes, testing_mode=False
             )
@@ -174,7 +175,7 @@ async def add_knowledge(
         content_size_bytes = len(content.encode("utf-8"))
         user_object = db.load_user(current_user)
         if user_object:
-            from socratic_system.subscription.storage import StorageQuotaManager
+            # Removed local import: from socratic_system.subscription.storage import StorageQuotaManager
             can_upload, error_msg = StorageQuotaManager.can_upload_document(
                 user_object, db, content_size_bytes, testing_mode=False
             )

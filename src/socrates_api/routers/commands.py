@@ -15,11 +15,24 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from socratic_system.ui.command_registry import get_registry, CommandCategory
-
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/commands", tags=["Commands"])
+
+# Local command registry (replaces non-existent socratic_system.ui.command_registry)
+class CommandCategory:
+    """Simple command category enum"""
+    QUERY = "query"
+    SYSTEM = "system"
+    WORKFLOW = "workflow"
+    ANALYSIS = "analysis"
+
+def get_registry():
+    """Get local command registry"""
+    return {
+        "categories": [CommandCategory.QUERY, CommandCategory.SYSTEM, CommandCategory.WORKFLOW, CommandCategory.ANALYSIS],
+        "commands": []  # Can be populated with actual commands
+    }
 
 
 # ============================================================================

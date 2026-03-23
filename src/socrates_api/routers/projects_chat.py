@@ -28,8 +28,12 @@ from socrates_api.models import (
     GetChatMessagesResponse,
     ListChatSessionsResponse,
 )
-from socratic_system.utils.logger import is_debug_mode
-from socratic_system.database import ProjectDatabase
+# Local debug mode
+_debug_mode = False
+
+def is_debug_mode() -> bool:
+    """Check if debug mode is enabled"""
+    return _debug_mode
 
 
 class ChatModeRequest(BaseModel):
@@ -779,7 +783,7 @@ Provide a helpful, direct answer."""
                 logger.debug("Insights extracted and saved to project (hidden from Socratic dialogue)")
 
             # Check if debug mode is enabled - if so, return insights for debugging
-            from socratic_system.utils.logger import is_debug_mode
+            # Removed local import: from socratic_system.utils.logger import is_debug_mode
             response_data = {}
 
             if is_debug_mode() and insights:

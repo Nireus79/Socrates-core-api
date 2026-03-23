@@ -21,6 +21,7 @@ from pydantic import BaseModel, Field
 
 from socrates_api.auth import get_current_user_optional
 from socrates_api.models import APIResponse
+from socrates_api.models_local import User
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/nlu", tags=["nlu"])

@@ -11,7 +11,8 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from socratic_system.conflict_resolution import ConflictDetector
+# Use PyPI library directly
+from socratic_conflict import ConflictDetector
 
 logger = logging.getLogger(__name__)
 

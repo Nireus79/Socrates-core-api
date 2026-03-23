@@ -27,8 +27,9 @@ from socrates_api.models import (
     ErrorResponse,
 )
 from socrates_api.websocket import get_connection_manager
-from socratic_system.database import ProjectDatabase
-from socratic_system.models import User
+from socrates_api.models_local import User
+# Database import replaced with local module
+# Removed local import: from socratic_system.models import User
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/projects", tags=["collaboration"])
@@ -284,7 +285,7 @@ async def add_collaborator_new(
             )
 
         # Initialize team_members if not present
-        from socratic_system.models.role import TeamMemberRole
+        # Removed local import: from socratic_system.models.role import TeamMemberRole
 
         project.team_members = project.team_members or []
 
@@ -1187,7 +1188,7 @@ async def accept_invitation(
             )
 
         # Add user to project team
-        from socratic_system.models.role import TeamMemberRole
+        # Removed local import: from socratic_system.models.role import TeamMemberRole
 
         project.team_members = project.team_members or []
 

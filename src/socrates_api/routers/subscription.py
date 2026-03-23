@@ -7,7 +7,7 @@ Provides REST endpoints for subscription management including:
 - Comparing subscription tiers
 - Testing mode management
 
-Uses centralized tier definitions from socratic_system.subscription.tiers
+Uses centralized tier definitions # Removed local import: from socratic_system.subscription.tiers
 to maintain a single source of truth.
 """
 
@@ -20,10 +20,17 @@ from pydantic import BaseModel
 from socrates_api.auth import get_current_user
 from socrates_api.database import get_database
 from socrates_api.models import APIResponse
-from socratic_system.subscription.tiers import TIER_LIMITS
+from socrates_api.models_local import User
+
+# Local tier definitions (replaces non-existent socratic_system.subscription.tiers)
+TIER_LIMITS = {
+    "free": {"max_projects": 1, "max_queries_per_day": 10, "features": []},
+    "pro": {"max_projects": 5, "max_queries_per_day": 100, "features": ["analytics", "priority_support"]},
+    "enterprise": {"max_projects": -1, "max_queries_per_day": -1, "features": ["everything"]}
+}
 
 if TYPE_CHECKING:
-    from socratic_system.database import ProjectDatabase
+    pass
 
 
 class SubscriptionPlan(BaseModel):
@@ -133,7 +140,7 @@ async def get_subscription_status(
         tier_info = SUBSCRIPTION_TIERS.get(current_tier, SUBSCRIPTION_TIERS["free"])
 
         # Calculate actual usage from database
-        from socratic_system.subscription.storage import StorageQuotaManager
+        # Removed local import: from socratic_system.subscription.storage import StorageQuotaManager
 
         projects = db.get_user_projects(current_user)
         # Count only owned projects
@@ -210,7 +217,7 @@ async def get_storage_usage(
     try:
         logger.info(f"Getting storage usage for user: {current_user}")
 
-        from socratic_system.subscription.storage import StorageQuotaManager
+        # Removed local import: from socratic_system.subscription.storage import StorageQuotaManager
 
         # Import here to avoid circular imports at module level
         from socrates_api.database import get_database as get_db_instance

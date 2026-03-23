@@ -15,7 +15,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 
 from socrates_api.models import APIResponse
-from socratic_system.database import ProjectDatabase
+from socrates_api.database import get_database
+from socrates_api.models_local import User, ProjectDatabase
+# Database import replaced with local module
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/events", tags=["events"])

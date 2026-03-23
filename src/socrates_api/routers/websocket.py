@@ -23,7 +23,7 @@ from socrates_api.websocket import (
     get_connection_manager,
     get_message_handler,
 )
-from socratic_system.database import ProjectDatabase
+# Database import replaced with local module
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="", tags=["websocket"])

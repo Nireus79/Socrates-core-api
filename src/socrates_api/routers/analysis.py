@@ -13,7 +13,8 @@ from socrates_api.auth import get_current_user
 from socrates_api.auth.project_access import check_project_access
 from socrates_api.database import get_database
 from socrates_api.models import APIResponse, ErrorResponse
-from socratic_system.database import ProjectDatabase
+from socrates_api.models_local import ProjectDatabase
+# Database import replaced with local module
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/analysis", tags=["analysis"])
@@ -688,7 +689,7 @@ async def analyze_code(
         - Architecture insights
     """
     try:
-        from socratic_system.core.analyzer_integration import AnalyzerIntegration
+        # Removed local import: from socratic_system.core.analyzer_integration import AnalyzerIntegration
         from socrates_api.routers.events import record_event
 
         # Initialize analyzer

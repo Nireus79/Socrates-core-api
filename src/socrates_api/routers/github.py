@@ -17,8 +17,10 @@ from socrates_api.models import (
     ErrorResponse,
     GitHubImportRequest,
 )
-from socratic_system.database import ProjectDatabase
+# Database import replaced with local module
 from socrates_api.auth.project_access import check_project_access
+from socrates_api.database import get_database
+from socrates_api.models_local import ProjectDatabase
 from socratic_agents import (
     GithubSyncHandler,
 )
@@ -143,7 +145,7 @@ async def import_repository(
         logger.info("Checking subscription limits for GitHub import...")
         try:
             from socrates_api.routers.projects import get_current_user_object
-            from socratic_system.subscription.checker import SubscriptionChecker
+            # Removed local import: from socratic_system.subscription.checker import SubscriptionChecker
 
             user_object = get_current_user_object(current_user)
 
@@ -228,7 +230,7 @@ async def import_repository(
         # Create project from GitHub import
         from datetime import datetime, timezone
 
-        from socratic_system.models.project import ProjectContext
+        # Removed local import: from socratic_system.models.project import ProjectContext
 
         project = ProjectContext(
             project_id=f"proj_{repo_name.lower()}",
@@ -269,7 +271,7 @@ async def import_repository(
                         readme_content = readme.decoded_string.decode('utf-8') if isinstance(readme.decoded_string, bytes) else str(readme.decoded_string)
                         if readme_content and len(readme_content.strip()) > 0:
                             # Add README to vector database
-                            from socratic_system.database import VectorDatabase
+                            # Removed local import: from socratic_system.database import VectorDatabase
                             vector_db = VectorDatabase()
                             metadata = {
                                 "source": "README.md",
@@ -311,7 +313,7 @@ async def import_repository(
                         extract_code_files(contents)
 
                         # Process extracted code files with chunking
-                        from socratic_system.database import VectorDatabase
+                        # Removed local import: from socratic_system.database import VectorDatabase
                         vector_db = VectorDatabase()
 
                         for code_file in files_to_process:
