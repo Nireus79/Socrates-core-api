@@ -617,7 +617,7 @@ async def import_file(
 
             # Emit DOCUMENT_IMPORTED event to trigger knowledge analysis and question regeneration
             try:
-                from socratic_system.events import EventType
+# REMOVED LOCAL IMPORT: from socratic_system.events import EventType
 
                 orchestrator.event_emitter.emit(
                     EventType.DOCUMENT_IMPORTED,
@@ -750,7 +750,7 @@ async def import_url(
 
         # Emit DOCUMENT_IMPORTED event to trigger knowledge analysis and question regeneration
         try:
-            from socratic_system.events import EventType
+# REMOVED LOCAL IMPORT: from socratic_system.events import EventType
 
             orchestrator.event_emitter.emit(
                 EventType.DOCUMENT_IMPORTED,
@@ -891,7 +891,7 @@ async def import_text(
         # Emit DOCUMENT_IMPORTED event to trigger knowledge analysis and question regeneration
         word_count = len(content.split())
         try:
-            from socratic_system.events import EventType
+# REMOVED LOCAL IMPORT: from socratic_system.events import EventType
 
             orchestrator.event_emitter.emit(
                 EventType.DOCUMENT_IMPORTED,

@@ -28,7 +28,7 @@ from socrates_api.middleware.rate_limit import (
     initialize_limiter,
 )
 from socrates_api.middleware.security_headers import add_security_headers_middleware
-from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
 from .models import (
     AskQuestionRequest,
@@ -479,7 +479,7 @@ async def detailed_health_check():
     Returns comprehensive system status including database, cache, and service details.
     """
     from socrates_api.caching import get_cache
-    from socratic_system.database.query_profiler import get_profiler
+# REMOVED LOCAL IMPORT: from socratic_system.database.query_profiler import get_profiler
 
     try:
         cache = get_cache()
@@ -593,7 +593,7 @@ async def query_metrics():
             ...
         }
     """
-    from socratic_system.database.query_profiler import get_profiler
+# REMOVED LOCAL IMPORT: from socratic_system.database.query_profiler import get_profiler
 
     profiler = get_profiler()
     return profiler.get_stats()
@@ -610,7 +610,7 @@ async def slow_query_metrics(min_count: int = 1):
     Returns:
         List of slow queries sorted by slow execution count
     """
-    from socratic_system.database.query_profiler import get_profiler
+# REMOVED LOCAL IMPORT: from socratic_system.database.query_profiler import get_profiler
 
     profiler = get_profiler()
     return profiler.get_slow_queries(min_slow_count=min_count)
@@ -627,7 +627,7 @@ async def slowest_query_metrics(limit: int = 10):
     Returns:
         List of slowest queries sorted by average execution time
     """
-    from socratic_system.database.query_profiler import get_profiler
+# REMOVED LOCAL IMPORT: from socratic_system.database.query_profiler import get_profiler
 
     profiler = get_profiler()
     return profiler.get_slowest_queries(limit=limit)

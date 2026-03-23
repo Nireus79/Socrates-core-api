@@ -65,7 +65,7 @@ async def analyze_code_quality(
         Dictionary with analysis results including quality_score, issues, recommendations
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         # Get orchestrator from app state (would need to be passed as dependency in real implementation)
         # For now, creating a minimal instance
@@ -125,7 +125,7 @@ async def log_learning_interaction(
         Interaction log entry or None if learning system unavailable
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         result = orchestrator.log_learning_interaction(
@@ -153,7 +153,7 @@ async def get_learning_status() -> Dict[str, Any]:
         Dictionary with learning system status and capabilities
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         status = orchestrator.get_library_status()
@@ -195,7 +195,7 @@ async def detect_agent_conflicts(
         Conflict resolution result with recommended value and confidence
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         result = orchestrator.detect_agent_conflicts(field, agent_outputs, agents)
@@ -214,7 +214,7 @@ async def get_conflict_status() -> Dict[str, Any]:
         Dictionary with conflict resolution capabilities
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         status = orchestrator.get_library_status()
@@ -258,7 +258,7 @@ async def store_knowledge_item(
         Created knowledge item info or None if unavailable
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         result = orchestrator.store_knowledge(tenant_id, title, content, tags)
@@ -288,7 +288,7 @@ async def search_knowledge(
         List of matching knowledge items
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         results = orchestrator.search_knowledge(tenant_id, query)
@@ -307,7 +307,7 @@ async def get_knowledge_status() -> Dict[str, Any]:
         Dictionary with knowledge management capabilities
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         status = orchestrator.get_library_status()
@@ -345,7 +345,7 @@ async def generate_project_documentation(
         Generated README content as string
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         result = orchestrator.generate_documentation(project_info)
@@ -364,7 +364,7 @@ async def get_docs_status() -> Dict[str, Any]:
         Dictionary with documentation generation capabilities
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         status = orchestrator.get_library_status()
@@ -404,7 +404,7 @@ async def execute_workflow(
         Workflow execution result with status and task results
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         result = orchestrator.library_manager.workflow.execute_workflow(
@@ -425,7 +425,7 @@ async def get_workflow_status() -> Dict[str, Any]:
         Workflow system capabilities and status
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         status = orchestrator.get_library_status()
@@ -458,7 +458,7 @@ async def get_performance_metrics() -> Dict[str, Any]:
         Performance statistics and metrics
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         stats = orchestrator.library_manager.performance.get_performance_stats()
@@ -486,7 +486,7 @@ async def profile_execution(
         Profiling confirmation
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         orchestrator.library_manager.performance.profile_execution(
@@ -507,7 +507,7 @@ async def get_performance_status() -> Dict[str, Any]:
         Performance monitoring capabilities
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         status = orchestrator.get_library_status()
@@ -549,7 +549,7 @@ async def index_rag_document(
         Indexing confirmation with document ID
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         doc_id = orchestrator.index_rag_document(content, source, metadata)
@@ -585,7 +585,7 @@ async def search_rag(
         List of relevant documents with scores
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         results = orchestrator.search_rag(query, limit)
@@ -604,7 +604,7 @@ async def get_rag_status() -> Dict[str, Any]:
         RAG system status and vector store information
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         status = orchestrator.get_library_status()
@@ -645,7 +645,7 @@ async def execute_agent(
         Agent execution result
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         result = orchestrator.execute_agent(agent_name, request_data)
@@ -664,7 +664,7 @@ async def list_agents() -> Dict[str, Any]:
         Dictionary of available agents and their capabilities
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         agents = orchestrator.list_agents()
@@ -692,7 +692,7 @@ async def get_agents_status() -> Dict[str, Any]:
         Agent orchestration system status
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         status = orchestrator.get_library_status()
@@ -730,7 +730,7 @@ async def validate_input(
         Validation result with security score
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         result = orchestrator.validate_security_input(user_input)
@@ -749,7 +749,7 @@ async def get_security_status() -> Dict[str, Any]:
         Security system features and status
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         status = orchestrator.get_library_status()
@@ -794,7 +794,7 @@ async def call_llm(
         LLM response with token usage and cost
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         result = orchestrator.call_llm(
@@ -818,7 +818,7 @@ async def list_llm_models() -> Dict[str, Any]:
         Dictionary of providers and available models
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         models = orchestrator.list_llm_models()
@@ -842,7 +842,7 @@ async def get_llm_status() -> Dict[str, Any]:
         LLM provider status and capabilities
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         status = orchestrator.get_library_status()
@@ -869,7 +869,7 @@ async def get_system_info() -> Dict[str, Any]:
         Framework version, configuration, and capabilities
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         info = orchestrator.get_system_info()
@@ -893,7 +893,7 @@ async def get_system_config() -> Dict[str, Any]:
         Active configuration settings
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         config = orchestrator.get_system_config()
@@ -917,7 +917,7 @@ async def get_core_status() -> Dict[str, Any]:
         Framework status and health
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         status = orchestrator.get_library_status()
@@ -950,7 +950,7 @@ async def get_all_library_status() -> Dict[str, Any]:
         - Interfaces: socrates-cli, socrates-core-api
     """
     try:
-        from socratic_system.orchestration.orchestrator import AgentOrchestrator
+# REMOVED LOCAL IMPORT: from socratic_system.orchestration.orchestrator import AgentOrchestrator
 
         orchestrator = AgentOrchestrator(api_key_or_config="placeholder")
         status = orchestrator.get_library_status()

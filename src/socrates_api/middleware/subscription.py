@@ -4,7 +4,7 @@ Subscription-based Feature Gating Middleware.
 Enforces feature access based on user subscription tier.
 Provides decorators for protecting endpoints by tier requirements.
 
-Centralized tier definitions now imported from socratic_system.subscription.tiers
+# REMOVED LOCAL IMPORT: Centralized tier definitions now imported from socratic_system.subscription.tiers
 to maintain a single source of truth across CLI, API, and storage systems.
 """
 
@@ -13,9 +13,26 @@ from functools import wraps
 from typing import Callable
 
 from fastapi import HTTPException, status
-from socratic_system.subscription.tiers import TIER_LIMITS
 
 logger = logging.getLogger(__name__)
+
+# Local tier limit definitions (replaces removed socratic_system.subscription.tiers)
+class TierLimits:
+    def __init__(self, max_projects, max_team_members, storage_gb, max_questions_per_month,
+                 code_generation=True, advanced_analytics=False, multi_llm_access=False):
+        self.max_projects = max_projects
+        self.max_team_members = max_team_members
+        self.storage_gb = storage_gb
+        self.max_questions_per_month = max_questions_per_month
+        self.code_generation = code_generation
+        self.advanced_analytics = advanced_analytics
+        self.multi_llm_access = multi_llm_access
+
+TIER_LIMITS = {
+    "free": TierLimits(max_projects=1, max_team_members=1, storage_gb=1, max_questions_per_month=10),
+    "pro": TierLimits(max_projects=5, max_team_members=5, storage_gb=100, max_questions_per_month=1000, advanced_analytics=True, multi_llm_access=True),
+    "enterprise": TierLimits(max_projects=-1, max_team_members=-1, storage_gb=-1, max_questions_per_month=-1, advanced_analytics=True, multi_llm_access=True),
+}
 
 # Build API-compatible feature matrix from central TIER_LIMITS
 # This maintains backward compatibility while using the centralized definitions

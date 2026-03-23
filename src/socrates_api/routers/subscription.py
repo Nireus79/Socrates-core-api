@@ -7,7 +7,7 @@ Provides REST endpoints for subscription management including:
 - Comparing subscription tiers
 - Testing mode management
 
-Uses centralized tier definitions # Removed local import: from socratic_system.subscription.tiers
+# REMOVED LOCAL IMPORT: Uses centralized tier definitions # Removed local import: from socratic_system.subscription.tiers
 to maintain a single source of truth.
 """
 

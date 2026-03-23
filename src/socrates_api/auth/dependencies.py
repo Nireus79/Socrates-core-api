@@ -13,8 +13,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from socrates_api.auth.jwt_handler import verify_access_token
 from socrates_api.database import get_database
-from socratic_system.database import ProjectDatabase
-from socratic_system.models import User
+from socrates_api.models_local import ProjectDatabase, User
 
 logger = logging.getLogger(__name__)
 

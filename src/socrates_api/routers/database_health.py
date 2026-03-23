@@ -93,7 +93,7 @@ async def get_connection_pool():
     Raises:
         HTTPException: If pool not initialized
     """
-    from socratic_system.database.connection_pool import get_pool
+# REMOVED LOCAL IMPORT: from socratic_system.database.connection_pool import get_pool
 
     try:
         return get_pool()
@@ -110,7 +110,7 @@ async def get_query_profiler():
     Returns:
         QueryProfiler: The global profiler instance
     """
-    from socratic_system.database.query_profiler import get_profiler
+# REMOVED LOCAL IMPORT: from socratic_system.database.query_profiler import get_profiler
 
     return get_profiler()
 
