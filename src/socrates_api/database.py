@@ -60,6 +60,21 @@ class LocalDatabase:
                 )
             """)
 
+            # Refresh tokens table - stores refresh token hashes for authentication
+            self.conn.execute("""
+                CREATE TABLE IF NOT EXISTS refresh_tokens (
+                    id TEXT PRIMARY KEY,
+                    user_id TEXT NOT NULL,
+                    token_hash TEXT NOT NULL,
+                    expires_at TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    revoked_at TEXT,
+                    FOREIGN KEY (user_id) REFERENCES users(username),
+                    INDEX idx_user_tokens (user_id),
+                    INDEX idx_expires (expires_at)
+                )
+            """)
+
             self.conn.commit()
             logger.info(f"Local database initialized: {self.db_path}")
         except Exception as e:
