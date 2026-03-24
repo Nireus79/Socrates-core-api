@@ -67,6 +67,10 @@ class User:
             "metadata": self.metadata
         }
 
+    def get(self, key: str, default: Any = None) -> Any:
+        """Dict-like get method for compatibility"""
+        return getattr(self, key, default)
+
 
 class ProjectContext:
     """Minimal ProjectContext model stub for API routers"""
