@@ -5,6 +5,10 @@ A FastAPI-based REST API that provides access to the Socrates AI tutoring system
 Enables integration with web frontends, mobile apps, and custom clients.
 """
 
+# Load environment variables FIRST, before anything else
+from dotenv import load_dotenv
+load_dotenv()
+
 __version__ = "0.5.0"
 __author__ = "Socrates AI Contributors"
 __license__ = "MIT"
