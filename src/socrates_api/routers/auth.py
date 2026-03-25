@@ -346,8 +346,8 @@ async def login(
             )
 
         # Load user from database
-        user = db.load_user(login_request.username)
-        if user is None:
+        user_dict = db.load_user(login_request.username)
+        if user_dict is None:
             logger.warning(f"Login attempt for non-existent user: {login_request.username}")
             # Record failed attempt for security tracking (REQUIRED)
             lockout_manager.record_attempt(login_request.username, "unknown", success=False)
@@ -356,8 +356,11 @@ async def login(
                 detail="Invalid username or access code",
             )
 
+        # Convert dict to User object
+        user = User(**user_dict)
+
         # Verify password
-        if not verify_password(login_request.password, user.get("passcode_hash", "")):
+        if not verify_password(login_request.password, user.passcode_hash):
             logger.warning(f"Failed login attempt for user: {login_request.username}")
             # Record failed attempt and check for lockout (REQUIRED)
             lockout_manager.check_and_lock(login_request.username, "api")
@@ -395,21 +398,12 @@ async def login(
         _store_refresh_token(db, login_request.username, refresh_token)
 
         # Check if user has API key configured (check all providers)
-        api_key_configured = True
-        api_key_message = None
-        try:
-            # Check for API keys from any provider (claude, openai, etc.)
-            stored_api_key = db.get_api_key(login_request.username, "claude")
-            if not stored_api_key:
-                api_key_configured = False
-                api_key_message = (
-                    "No API key configured. "
-                    "Please save your API key in Settings > LLM > Anthropic to use AI features."
-                )
-                logger.info(f"User {login_request.username} has no API key configured")
-        except Exception as e:
-            logger.warning(f"Error checking API key for user {login_request.username}: {e}")
-            # Don't fail login, just proceed with warning
+        # TODO: Implement API key storage in database
+        api_key_configured = False
+        api_key_message = (
+            "No API key configured. "
+            "Please save your API key in Settings > LLM > Anthropic to use AI features."
+        )
 
         return AuthResponse(
             user=_user_to_response(user),
