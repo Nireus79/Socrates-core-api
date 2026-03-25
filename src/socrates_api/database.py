@@ -69,11 +69,13 @@ class LocalDatabase:
                     expires_at TEXT NOT NULL,
                     created_at TEXT NOT NULL,
                     revoked_at TEXT,
-                    FOREIGN KEY (user_id) REFERENCES users(username),
-                    INDEX idx_user_tokens (user_id),
-                    INDEX idx_expires (expires_at)
+                    FOREIGN KEY (user_id) REFERENCES users(username)
                 )
             """)
+
+            # Create indexes separately (SQLite doesn't support inline indexes)
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_user_tokens ON refresh_tokens(user_id)")
+            self.conn.execute("CREATE INDEX IF NOT EXISTS idx_expires ON refresh_tokens(expires_at)")
 
             self.conn.commit()
             logger.info(f"Local database initialized: {self.db_path}")
