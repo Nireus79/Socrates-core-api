@@ -150,10 +150,10 @@ async def get_csrf_token(http_request: Request):
 @router.post(
     "/register",
     response_model=AuthResponse,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
     summary="Register a new user",
     responses={
-        201: {"description": "User registered successfully"},
+        200: {"description": "User registered successfully"},
         400: {"description": "Invalid request or username already exists", "model": ErrorResponse},
         500: {"description": "Server error during registration", "model": ErrorResponse},
     },
