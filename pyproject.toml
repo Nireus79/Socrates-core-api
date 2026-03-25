@@ -73,7 +73,7 @@ Repository = "https://github.com/Nireus79/Socrates"
 "Source Code" = "https://github.com/Nireus79/Socrates/tree/main/socrates-api"
 
 [tool.setuptools]
-packages = ["socrates_api"]
+packages = ["socrates_api", "socrates_api.middleware", "socrates_api.routers", "socrates_api.auth", "socrates_api.services", "socrates_api.websocket", "socrates_api.caching"]
 
 [tool.setuptools.package-dir]
 "" = "src"
