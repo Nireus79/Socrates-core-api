@@ -54,6 +54,10 @@ class LocalDatabase:
                     id TEXT PRIMARY KEY,
                     username TEXT UNIQUE NOT NULL,
                     email TEXT,
+                    passcode_hash TEXT,
+                    subscription_tier TEXT DEFAULT 'free',
+                    subscription_status TEXT DEFAULT 'active',
+                    testing_mode INTEGER DEFAULT 0,
                     created_at TEXT,
                     updated_at TEXT,
                     metadata TEXT
@@ -131,15 +135,15 @@ class LocalDatabase:
             logger.error(f"Failed to list projects: {e}")
             return []
 
-    def create_user(self, user_id: str, username: str, email: str = "", metadata: Dict = None) -> Dict:
+    def create_user(self, user_id: str, username: str, email: str = "", passcode_hash: str = "", metadata: Dict = None) -> Dict:
         """Create a new user"""
         try:
             now = datetime.utcnow().isoformat()
             meta_json = json.dumps(metadata or {})
 
             self.conn.execute(
-                "INSERT INTO users (id, username, email, created_at, updated_at, metadata) VALUES (?, ?, ?, ?, ?, ?)",
-                (user_id, username, email, now, now, meta_json),
+                "INSERT INTO users (id, username, email, passcode_hash, subscription_tier, subscription_status, testing_mode, created_at, updated_at, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (user_id, username, email, passcode_hash or "", "free", "active", 0, now, now, meta_json),
             )
             self.conn.commit()
 
@@ -158,9 +162,13 @@ class LocalDatabase:
                     "id": row[0],
                     "username": row[1],
                     "email": row[2],
-                    "created_at": row[3],
-                    "updated_at": row[4],
-                    "metadata": json.loads(row[5] or "{}"),
+                    "passcode_hash": row[3],
+                    "subscription_tier": row[4],
+                    "subscription_status": row[5],
+                    "testing_mode": bool(row[6]),
+                    "created_at": row[7],
+                    "updated_at": row[8],
+                    "metadata": json.loads(row[9] or "{}"),
                 }
             return None
         except Exception as e:
@@ -177,9 +185,13 @@ class LocalDatabase:
                     "id": row[0],
                     "username": row[1],
                     "email": row[2],
-                    "created_at": row[3],
-                    "updated_at": row[4],
-                    "metadata": json.loads(row[5] or "{}"),
+                    "passcode_hash": row[3],
+                    "subscription_tier": row[4],
+                    "subscription_status": row[5],
+                    "testing_mode": bool(row[6]),
+                    "created_at": row[7],
+                    "updated_at": row[8],
+                    "metadata": json.loads(row[9] or "{}"),
                 }
             return None
         except Exception as e:
@@ -196,9 +208,13 @@ class LocalDatabase:
                     "id": row[0],
                     "username": row[1],
                     "email": row[2],
-                    "created_at": row[3],
-                    "updated_at": row[4],
-                    "metadata": json.loads(row[5] or "{}"),
+                    "passcode_hash": row[3],
+                    "subscription_tier": row[4],
+                    "subscription_status": row[5],
+                    "testing_mode": bool(row[6]),
+                    "created_at": row[7],
+                    "updated_at": row[8],
+                    "metadata": json.loads(row[9] or "{}"),
                 }
             return None
         except Exception as e:
@@ -212,6 +228,10 @@ class LocalDatabase:
             user_id = user_data.get("id")
             username = user_data.get("username")
             email = user_data.get("email", "")
+            passcode_hash = user_data.get("passcode_hash", "")
+            subscription_tier = user_data.get("subscription_tier", "free")
+            subscription_status = user_data.get("subscription_status", "active")
+            testing_mode = int(user_data.get("testing_mode", False))
             meta_json = json.dumps(user_data.get("metadata", {}))
 
             # Check if user exists
@@ -220,8 +240,8 @@ class LocalDatabase:
             if existing:
                 # Update existing user
                 self.conn.execute(
-                    "UPDATE users SET username = ?, email = ?, updated_at = ?, metadata = ? WHERE id = ?",
-                    (username, email, now, meta_json, user_id)
+                    "UPDATE users SET username = ?, email = ?, passcode_hash = ?, subscription_tier = ?, subscription_status = ?, testing_mode = ?, updated_at = ?, metadata = ? WHERE id = ?",
+                    (username, email, passcode_hash, subscription_tier, subscription_status, testing_mode, now, meta_json, user_id)
                 )
             else:
                 # Create new user
@@ -230,8 +250,8 @@ class LocalDatabase:
                     user_id = str(uuid.uuid4())
                 created_at = user_data.get("created_at", now)
                 self.conn.execute(
-                    "INSERT INTO users (id, username, email, created_at, updated_at, metadata) VALUES (?, ?, ?, ?, ?, ?)",
-                    (user_id, username, email, created_at, now, meta_json)
+                    "INSERT INTO users (id, username, email, passcode_hash, subscription_tier, subscription_status, testing_mode, created_at, updated_at, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (user_id, username, email, passcode_hash, subscription_tier, subscription_status, testing_mode, created_at, now, meta_json)
                 )
             self.conn.commit()
             return self.get_user(user_id)
