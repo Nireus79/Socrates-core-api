@@ -357,7 +357,7 @@ async def login(
             )
 
         # Verify password
-        if not verify_password(login_request.password, user.passcode_hash):
+        if not verify_password(login_request.password, user.get("passcode_hash", "")):
             logger.warning(f"Failed login attempt for user: {login_request.username}")
             # Record failed attempt and check for lockout (REQUIRED)
             lockout_manager.check_and_lock(login_request.username, "api")
